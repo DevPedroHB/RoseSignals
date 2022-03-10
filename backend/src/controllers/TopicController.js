@@ -28,9 +28,11 @@ module.exports = {
     // Listar tópicos
     async list(request, response){
         const { search, page } = request.query;
-        const [count_topics] = await connection('topic').whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%'`).count();
+        const [count_topics] = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%' OR user.name LIKE '%${search}%'`).count();
         const total_pages = Math.ceil(count_topics['count(*)'] / 3);
-        const topics = await connection('topic').whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%'`).select('*').orderBy('id_topic', 'desc').limit(3).offset((page - 1) * 3);
+        const topics = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%' OR user.name LIKE '%${search}%'`).select('topic.*', 'user.name').orderBy('id_topic', 'desc').limit(3).offset((page - 1) * 3);
+        const likes = await connection('like_topic').join('user', {'user.id_user': 'like_topic.user_id'}).join('topic', {'topic.id_topic': 'like_topic.topic_id'}).select('topic.id_topic', 'user.id_user', 'user.name');
+        topics.map(t => t["likes"] = likes.filter(l => l.id_topic === t.id_topic));
         return response.json({ topics, total_pages });
     },
 

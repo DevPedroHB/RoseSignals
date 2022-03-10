@@ -79,9 +79,9 @@ module.exports = {
     // Listar usuário (Apenas para administradores)
     async list(request, response){
         const { permission, search, page } = request.query;
-        const [count_users] = await connection('user').whereRaw(permission === 'todos' ? `email LIKE '%${search}%' OR name LIKE '%${search}%'` : `permission = '${permission}' AND (email LIKE '%${search}%' OR name LIKE '%${search}%')`).count();
+        const [count_users] = await connection('user').whereRaw(permission === 'todos' ? `email LIKE '%${search}%' OR name LIKE '%${search}%' OR address LIKE '%${search}%'` : `permission = '${permission}' AND (email LIKE '%${search}%' OR name LIKE '%${search}%' OR address LIKE '%${search}%')`).count();
         const total_pages = Math.ceil(count_users['count(*)'] / 9);
-        const users = await connection('user').whereRaw(permission === 'todos' ? `email LIKE '%${search}%' OR name LIKE '%${search}%'` : `permission = '${permission}' AND (email LIKE '%${search}%' OR name LIKE '%${search}%')`).select('*').orderBy('name').limit(9).offset((page - 1) * 9);
+        const users = await connection('user').whereRaw(permission === 'todos' ? `email LIKE '%${search}%' OR name LIKE '%${search}%' OR address LIKE '%${search}%'` : `permission = '${permission}' AND (email LIKE '%${search}%' OR name LIKE '%${search}%' OR address LIKE '%${search}%')`).select('*').orderBy('name').limit(9).offset((page - 1) * 9);
         return response.json({ users, total_pages });
     },
 
