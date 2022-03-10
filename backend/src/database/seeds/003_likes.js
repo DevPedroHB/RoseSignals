@@ -226,7 +226,7 @@ exports.seed = function(knex){
       }, {
         topic_id: '18',
         user_id: '7084294bb725356f23b02596f0e63ee8'
-      },
+      }
     ]);
   });
 };
