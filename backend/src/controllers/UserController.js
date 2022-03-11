@@ -49,10 +49,10 @@ module.exports = {
 
     // Atualizar usuário (administradores e membros)
     async update(request, response){
-        const { id } = request.params;
+        const { id_user } = request.params;
         const { email, name, genre, birth_date, address, permission } = request.body;
         try{
-            await connection('user').where('id_user', id).update({ email, name, genre, birth_date, address, permission });
+            await connection('user').where({ id_user }).update({ email, name, genre, birth_date, address, permission });
             return response.json({ success: `Usuário atualizado com sucesso!` });
         } catch(error){
             response.json({ error: `Erro ao atualizar o usuário!` });
@@ -61,8 +61,8 @@ module.exports = {
 
     // Atualizar imagem do usuário
     async updateImg(request, response){
-        const { id } = request.params;
-        const user = await connection('user').where('id_user', id).select('*').first();
+        const { id_user } = request.params;
+        const user = await connection('user').where({ id_user }).select('*').first();
         if(user.image !== null){
             const name_image = user.image.split('/')[5];
             promisify(fs.unlink)(path.resolve(__dirname, "..", "..", "uploads", "users", name_image));
@@ -87,8 +87,8 @@ module.exports = {
 
     // Deletar usuário (Apenas para administradores)
     async delete(request, response){
-        const { id } = request.params;
-        await connection('user').where('id_user', id).delete();
+        const { id_user } = request.params;
+        await connection('user').where({ id_user }).delete();
         return response.json({ success: `Usuário excluído com sucesso!` });
     }
 }
