@@ -14,12 +14,14 @@ routes.post('/recover', UserController.recover);
 routes.put('/user/:id_user', UserController.update);
 routes.put('/user/image/:id_user', multer(UserMulter).array('file', 1), UserController.updateImg);
 routes.get('/admin/users', UserController.list);
+routes.get('/user/topics/:id_user', UserController.topics);
 routes.delete('/admin/users/:id_user', UserController.delete);
 
 // Rotas tópicos
 routes.post('/topic/:user_id', TopicController.create);
 routes.put('/topic/:id_topic', TopicController.update);
 routes.get('/topic', TopicController.list);
+routes.get('/topic/:id_topic', TopicController.listSpecific);
 routes.delete('/topic/:id_topic', TopicController.delete);
 
 // Rotas reações

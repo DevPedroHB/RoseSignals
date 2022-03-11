@@ -85,6 +85,15 @@ module.exports = {
         return response.json({ users, total_pages });
     },
 
+    // Listar todos os tópicos criado por um usuário junto com suas reações
+    async topics(request, response){
+        const { id_user } = request.params;
+        const topics = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).where({ id_user }).select('topic.*', 'user.name');
+        const reactions = await connection('reaction').join('user', {'user.id_user': 'reaction.user_id'}).join('topic', {'topic.id_topic': 'reaction.topic_id'}).select('reaction.id_reaction', 'topic.id_topic', 'user.id_user', 'user.name', 'reaction.type', 'reaction.commentary', 'reaction.updated_at');
+        topics.map(t => t["reactions"] = reactions.filter(r => r.id_topic === t.id_topic).filter(r => delete r.id_topic));
+        return response.json({ topics });
+    },
+
     // Deletar usuário (Apenas para administradores)
     async delete(request, response){
         const { id_user } = request.params;

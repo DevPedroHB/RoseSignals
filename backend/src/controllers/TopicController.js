@@ -31,9 +31,18 @@ module.exports = {
         const [count_topics] = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%' OR user.name LIKE '%${search}%'`).count();
         const total_pages = Math.ceil(count_topics['count(*)'] / 3);
         const topics = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%' OR user.name LIKE '%${search}%'`).select('topic.*', 'user.name').orderBy('id_topic', 'desc').limit(3).offset((page - 1) * 3);
-        const reaction = await connection('reaction').join('user', {'user.id_user': 'reaction.user_id'}).join('topic', {'topic.id_topic': 'reaction.topic_id'}).select('reaction.id_reaction', 'topic.id_topic', 'user.id_user', 'user.name', 'reaction.type', 'reaction.commentary', 'reaction.updated_at');
-        topics.map(t => t["reaction"] = reaction.filter(r => r.id_topic === t.id_topic).filter(r => delete r.id_topic));
+        const reactions = await connection('reaction').join('user', {'user.id_user': 'reaction.user_id'}).join('topic', {'topic.id_topic': 'reaction.topic_id'}).select('reaction.id_reaction', 'topic.id_topic', 'user.id_user', 'user.name', 'reaction.type', 'reaction.commentary', 'reaction.updated_at');
+        topics.map(t => t["reactions"] = reactions.filter(r => r.id_topic === t.id_topic).filter(r => delete r.id_topic));
         return response.json({ topics, total_pages });
+    },
+
+    // Listar um tópico específico junto com suas reações
+    async listSpecific(request, response){
+        const { id_topic } = request.params;
+        const [ topic ] = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).where({ id_topic }).select('topic.*', 'user.name');
+        const reactions = await connection('reaction').join('user', {'user.id_user': 'reaction.user_id'}).join('topic', {'topic.id_topic': 'reaction.topic_id'}).where({ id_topic }).select('reaction.id_reaction', 'topic.id_topic', 'user.id_user', 'user.name', 'reaction.type', 'reaction.commentary', 'reaction.updated_at');
+        topic["reactions"] = reactions.filter(r => delete r.id_topic);
+        return response.json({ topic });
     },
 
     // Deletar tópicos
