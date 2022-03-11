@@ -31,10 +31,8 @@ module.exports = {
         const [count_topics] = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%' OR user.name LIKE '%${search}%'`).count();
         const total_pages = Math.ceil(count_topics['count(*)'] / 3);
         const topics = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`title LIKE '%${search}%' OR description LIKE '%${search}%' OR user.name LIKE '%${search}%'`).select('topic.*', 'user.name').orderBy('id_topic', 'desc').limit(3).offset((page - 1) * 3);
-        const likes = await connection('like_topic').join('user', {'user.id_user': 'like_topic.user_id'}).join('topic', {'topic.id_topic': 'like_topic.topic_id'}).select('topic.id_topic', 'user.id_user', 'user.name');
-        const commentaries = await connection('comment_topic').join('user', {'user.id_user': 'comment_topic.user_id'}).join('topic', {'topic.id_topic': 'comment_topic.topic_id'}).select('id_comment_topic', 'topic.id_topic', 'comment_topic.commentary', 'user.id_user', 'user.name', 'comment_topic.updated_at');
-        topics.map(t => t["likes"] = likes.filter(l => l.id_topic === t.id_topic).filter(l => delete l.id_topic));
-        topics.map(t => t["commentaries"] = commentaries.filter(c => c.id_topic === t.id_topic).filter(c => delete c.id_topic));
+        const reaction = await connection('reaction').join('user', {'user.id_user': 'reaction.user_id'}).join('topic', {'topic.id_topic': 'reaction.topic_id'}).select('topic.id_topic', 'user.id_user', 'user.name', 'reaction.type', 'reaction.commentary', 'reaction.updated_at');
+        topics.map(t => t["reaction"] = reaction.filter(r => r.id_topic === t.id_topic).filter(r => delete r.id_topic));
         return response.json({ topics, total_pages });
     },
 

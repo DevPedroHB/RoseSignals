@@ -26,18 +26,10 @@ CREATE TABLE topic(
     FOREIGN KEY(user_id) REFERENCES user(id_user) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE like_topic(
-	id_like_topic INTEGER AUTO_INCREMENT PRIMARY KEY,
-    topic_id INTEGER,
-    FOREIGN KEY(topic_id) REFERENCES topic(id_topic) ON DELETE CASCADE ON UPDATE CASCADE,
-    user_id CHAR(32),
-    FOREIGN KEY(user_id) REFERENCES user(id_user) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE comment_topic(
+CREATE TABLE reaction(
 	id_comment_topic INTEGER AUTO_INCREMENT PRIMARY KEY,
-    commentary LONGTEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    type VARCHAR(25) NOT NULL,
+    commentary LONGTEXT,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     topic_id INTEGER,
     FOREIGN KEY(topic_id) REFERENCES topic(id_topic) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -47,5 +39,4 @@ CREATE TABLE comment_topic(
 
 SELECT * FROM user;
 SELECT * FROM topic;
-SELECT * FROM like_topic;
-SELECT * FROM comment_topic;
+SELECT * FROM reaction;
