@@ -88,10 +88,13 @@ module.exports = {
     // Listar todos os tópicos criado por um usuário junto com suas reações
     async topics(request, response){
         const { id_user } = request.params;
-        const topics = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).where({ id_user }).select('topic.*', 'user.name');
+        const { search, page } = request.query;
+        const [count_topics] = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`user.id_user LIKE '%${id_user}%' OR description LIKE '%${search}%' OR title LIKE '%${search}%'`).count();
+        const total_pages = Math.ceil(count_topics['count(*)'] / 3);
+        const topics = await connection('topic').join('user', {'user.id_user': 'topic.user_id'}).whereRaw(`user.id_user LIKE '%${id_user}%' OR title LIKE '%${search}%' OR description LIKE '%${search}%'`).select('topic.*', 'user.name').orderBy('id_topic', 'desc').limit(3).offset((page - 1) * 3);
         const reactions = await connection('reaction').join('user', {'user.id_user': 'reaction.user_id'}).join('topic', {'topic.id_topic': 'reaction.topic_id'}).select('reaction.id_reaction', 'topic.id_topic', 'user.id_user', 'user.name', 'reaction.type', 'reaction.commentary', 'reaction.updated_at');
         topics.map(t => t["reactions"] = reactions.filter(r => r.id_topic === t.id_topic).filter(r => delete r.id_topic));
-        return response.json({ topics });
+        return response.json({ topics, total_pages });
     },
 
     // Deletar usuário (Apenas para administradores)
