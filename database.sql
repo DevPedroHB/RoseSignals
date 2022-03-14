@@ -4,11 +4,11 @@ USE rosesignals;
 
 CREATE TABLE user(
 	id_user CHAR(32) UNIQUE PRIMARY KEY,
-    email VARCHAR(255) UNIQUE,
-    password VARCHAR(255),
-    name VARCHAR(255),
-    genre CHAR(1),
-    birth_date DATE,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    genre CHAR(1) NOT NULL,
+    birth_date DATE NOT NULL,
     address MEDIUMTEXT,
     image VARCHAR(255),
     permission VARCHAR(50) DEFAULT 'membro',
@@ -37,6 +37,22 @@ CREATE TABLE reaction(
     FOREIGN KEY(user_id) REFERENCES user(id_user) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE spreadsheet(
+	id_spreadsheet INTEGER AUTO_INCREMENT PRIMARY KEY,
+    name_spreadsheet VARCHAR(255) NOT NULL,
+    initial_bankroll DECIMAL(12,2) NOT NULL,
+    objective DECIMAL(12,2) NOT NULL,
+    daily_profit DECIMAL(12,2) NOT NULL,
+    payout DECIMAL(5,2) NOT NULL,
+    in_box DECIMAL(12,2) NOT NULL,
+    type_spreadsheet CHAR(7) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	user_id CHAR(32),
+    FOREIGN KEY(user_id) REFERENCES user(id_user) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 SELECT * FROM user;
 SELECT * FROM topic;
 SELECT * FROM reaction;
+SELECT * FROM spreadsheet;

@@ -97,6 +97,13 @@ module.exports = {
         return response.json({ topics, total_pages });
     },
 
+    // Listar todos as planilhas criada por um usuário
+    async spreadsheets(request, response){
+        const { id_user } = request.params;
+        const spreadsheets = await connection('spreadsheet').join('user', {'user.id_user': 'spreadsheet.user_id'}).where({ id_user }).select('spreadsheet.*', 'user.name');
+        return response.json({ spreadsheets });
+    },
+
     // Deletar usuário (Apenas para administradores)
     async delete(request, response){
         const { id_user } = request.params;

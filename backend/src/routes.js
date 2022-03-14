@@ -4,6 +4,7 @@ const UserMulter = require('../middleware/UserMulter');
 const UserController = require('./controllers/UserController');
 const TopicController = require('./controllers/TopicController');
 const ReactionController = require('./controllers/ReactionController');
+const SpreadsheetController = require('./controllers/SpreadsheetController');
 
 const routes = express.Router();
 
@@ -15,6 +16,7 @@ routes.put('/user/:id_user', UserController.update);
 routes.put('/user/image/:id_user', multer(UserMulter).array('file', 1), UserController.updateImg);
 routes.get('/admin/users', UserController.list);
 routes.get('/user/topics/:id_user', UserController.topics);
+routes.get('/user/spreadsheets/:id_user', UserController.spreadsheets);
 routes.delete('/admin/users/:id_user', UserController.delete);
 
 // Rotas tópicos
@@ -28,5 +30,12 @@ routes.delete('/topic/:id_topic', TopicController.delete);
 routes.post('/reaction/:topic_id/:user_id', ReactionController.create);
 routes.put('/reaction/:id_reaction', ReactionController.update);
 routes.delete('/reaction/:id_reaction', ReactionController.delete);
+
+// Rotas planilhas
+routes.post('/spreadsheet/:user_id', SpreadsheetController.create);
+routes.put('/spreadsheet/:id_spreadsheet/:user_id', SpreadsheetController.update);
+routes.get('/spreadsheet', SpreadsheetController.list);
+routes.get('/spreadsheet/:id_spreadsheet', SpreadsheetController.listSpecific);
+routes.delete('/spreadsheet/:id_spreadsheet/:user_id', SpreadsheetController.delete);
 
 module.exports = routes;
