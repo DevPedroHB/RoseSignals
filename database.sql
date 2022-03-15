@@ -10,6 +10,7 @@ CREATE TABLE user(
     genre CHAR(1) NOT NULL,
     birth_date DATE NOT NULL,
     address MEDIUMTEXT,
+    about LONGTEXT,
     image VARCHAR(255),
     permission VARCHAR(50) DEFAULT 'membro',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

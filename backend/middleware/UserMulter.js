@@ -9,11 +9,8 @@ module.exports = {
             cb(null, path.resolve(__dirname, "..", "uploads", "users"));
         },
         filename: (req, file, cb) => {
-            crypto.randomBytes(8, (err, hash) => {
-                if (err) cb(err);
-                const filename = `${hash.toString("hex")}-${file.originalname.replace(/\s/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`;
-                cb(null, filename);
-            });
+            const filename = `${req.params.id_user}-${file.originalname.replace(/\s/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`;
+            cb(null, filename);
         }
     }),
     limits: {

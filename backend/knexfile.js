@@ -1,11 +1,13 @@
+require('dotenv').config();
+
 module.exports = {
   development: {
     client: 'mysql',
     connection: {
-      host: 'localhost',
-      user: 'root',
-      password: '1234',
-      database: 'rosesignals'
+      host: process.env.HOST,
+      user: process.env.USER,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE
     },
     seeds: {
       directory: './src/database/seeds'

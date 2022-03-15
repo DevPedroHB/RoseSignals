@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 module.exports = (request, response, next) => {
     try{
-        const decoded = jwt.verify(request.headers.authorization, 'p3dr0h8@d3v');
+        const decoded = jwt.verify(request.headers.authorization, process.env.CRYPTOGRAPHY);
         request.usuario = decoded;
         next();
     } catch(error){

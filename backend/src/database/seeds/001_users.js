@@ -4,7 +4,7 @@ exports.seed = function(knex){
       {
         id_user: 'f3f9955f269fbd989f9aeb99bf0d09df',
         email: 'pedrohenriquebergamo.16@gmail.com',
-        password: 'f00415daa244c2d048da0675b2739ea2',
+        password: 'ed529760e64c84c6a3b7e27e9b0c726d',
         name: 'Pedro Henrique Bérgamo',
         genre: 'M',
         birth_date: '2002-03-18',

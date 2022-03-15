@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
 const { promisify } = require('util');
+require('dotenv').config();
 
 module.exports = {
     // Registrar usuário
@@ -13,8 +14,8 @@ module.exports = {
         const { email, password, name, genre, birth_date } = request.body;
         const id_user = crypto.randomBytes(16).toString('HEX');
         try{
-            await connection('user').insert({ id_user, email, password: md5(`${password}+p3dr0h8@d3v`), name, genre, birth_date });
-            const token = jwt.sign({ id_user: id_user, email: email, name: name, genre: genre, birth_date: birth_date, andress: null, image: null, permission: 'membro' }, 'p3dr0h8@d3v', { expiresIn: "1d" });
+            await connection('user').insert({ id_user, email, password: md5(`${password}+${process.env.CRYPTOGRAPHY}`), name, genre, birth_date });
+            const token = jwt.sign({ id_user: id_user, email: email, name: name, genre: genre, birth_date: birth_date, andress: null, image: null, permission: 'membro' }, process.env.CRYPTOGRAPHY, { expiresIn: "1m" });
             return response.json({ token: token });
         } catch(error){
             response.json({ error: `Esse email já está registrado!` });
@@ -24,9 +25,9 @@ module.exports = {
     // Logar usuário
     async login(request, response){
         const { email, password } = request.body;
-        const user = await connection('user').where({ email, password: md5(`${password}+p3dr0h8@d3v`) }).select('*').first();
+        const user = await connection('user').where({ email, password: md5(`${password}+${process.env.CRYPTOGRAPHY}`) }).select('*').first();
         if(!user) return response.json({ warning: `Essa conta não foi encontrada! Verifique o email ou senha!` });
-        const token = jwt.sign({ id_user: user.id_user, email: user.email, name: user.name, genre: user.genre, birth_date: user.birth_date, address: user.address, image: user.image, permission: user.permission }, 'p3dr0h8@d3v', { expiresIn: "1d" });
+        const token = jwt.sign({ id_user: user.id_user, email: user.email, name: user.name, genre: user.genre, birth_date: user.birth_date, address: user.address, about: user.about, image: user.image, permission: user.permission }, process.env.CRYPTOGRAPHY, { expiresIn: "1m" });
         return response.json({ token: token });
     },
 
@@ -37,9 +38,9 @@ module.exports = {
         if(!user) return response.json({ warning: `Esse usuário não foi encontrado! Verifique os dados!` });
         try{
             const senha = crypto.randomBytes(4).toString('HEX');
-            await connection('user').where('id_user', user.id_user).update({ password: md5(`${senha}+p3dr0h8@d3v`) });
+            await connection('user').where('id_user', user.id_user).update({ password: md5(`${senha}+${process.env.CRYPTOGRAPHY}`) });
             // https://myaccount.google.com/lesssecureapps?pli=1
-            var transporte = nodemailer.createTransport({ service: `gmail`, auth: { user: 'rosesignalsofc@gmail.com', pass: 'r0s3s1gn4ls@0fc' } });
+            var transporte = nodemailer.createTransport({ service: `gmail`, auth: { user: process.env.EMAIL, pass: process.env.PASSWORD } });
             var layout_email = { from: 'rosesignalsofc@gmail.com', to: user.email, subject: 'RoseSignals - Recuperação de senha', html: `<h1>Sua nova senha de acesso é: </h1><h3><strong>${senha}</strong></h3><small>Não responda esse email!</small>` }
             transporte.sendMail(layout_email).then(() => response.json({ success: `Sua nova senha foi enviada para seu email` })).catch(error => response.json({ error: `Não foi possível enviar o e-mail com sua nova senha. Contate o desenvolvedor! ${error}` }));
         } catch(error){
@@ -50,9 +51,9 @@ module.exports = {
     // Atualizar usuário (administradores e membros)
     async update(request, response){
         const { id_user } = request.params;
-        const { email, name, genre, birth_date, address, permission } = request.body;
+        const { email, name, genre, birth_date, address, about, permission } = request.body;
         try{
-            await connection('user').where({ id_user }).update({ email, name, genre, birth_date, address, permission });
+            await connection('user').where({ id_user }).update({ email, name, genre, birth_date, address, about, permission });
             return response.json({ success: `Usuário atualizado com sucesso!` });
         } catch(error){
             response.json({ error: `Erro ao atualizar o usuário!` });
@@ -69,10 +70,10 @@ module.exports = {
         }
         const image = `http://localhost:3333/image/user/${request.files[0].filename}`;
         try{
-            await connection('user').where('id_user', id).update({ image });
+            await connection('user').where({ id_user }).update({ image });
             return response.json({ success: `Imagem atualizada com sucesso!` });
         } catch(error){
-            response.json({ error: `Erro ao atualizar a imagem!` });
+            response.json({ error: `Erro ao atualizar a imagem! ${error}` });
         }
     },
 
