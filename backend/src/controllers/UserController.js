@@ -15,7 +15,7 @@ module.exports = {
         const id_user = crypto.randomBytes(16).toString('HEX');
         try{
             await connection('user').insert({ id_user, email, password: md5(`${password}+${process.env.CRYPTOGRAPHY}`), name, genre, birth_date });
-            const token = jwt.sign({ id_user: id_user, email: email, name: name, genre: genre, birth_date: birth_date, andress: null, image: null, permission: 'membro' }, process.env.CRYPTOGRAPHY, { expiresIn: "1m" });
+            const token = jwt.sign({ id_user: id_user, email: email, name: name, genre: genre, birth_date: birth_date, andress: null, image: null, permission: 'membro' }, process.env.CRYPTOGRAPHY, { expiresIn: "1d" });
             return response.json({ token: token });
         } catch(error){
             response.json({ error: `Esse email já está registrado!` });
@@ -27,11 +27,11 @@ module.exports = {
         const { email, password } = request.body;
         const user = await connection('user').where({ email, password: md5(`${password}+${process.env.CRYPTOGRAPHY}`) }).select('*').first();
         if(!user) return response.json({ warning: `Essa conta não foi encontrada! Verifique o email ou senha!` });
-        const token = jwt.sign({ id_user: user.id_user, email: user.email, name: user.name, genre: user.genre, birth_date: user.birth_date, address: user.address, about: user.about, image: user.image, permission: user.permission }, process.env.CRYPTOGRAPHY, { expiresIn: "1m" });
+        const token = jwt.sign({ id_user: user.id_user, email: user.email, name: user.name, genre: user.genre, birth_date: user.birth_date, address: user.address, about: user.about, image: user.image, permission: user.permission }, process.env.CRYPTOGRAPHY, { expiresIn: "1d" });
         return response.json({ token: token });
     },
 
-    // recuperar senha do usuário
+    // Recuperar senha do usuário
     async recover(request, response){
         const { email, name, birth_date } = request.body;
         const user = await connection('user').where({ email, name, birth_date }).select('*').first();
@@ -48,30 +48,29 @@ module.exports = {
         }
     },
 
-    // Atualizar usuário (administradores e membros)
+    // Atualizar usuário
     async update(request, response){
-        const { id_user } = request.params;
-        const { email, name, genre, birth_date, address, about, permission } = request.body;
+        const { email, name, genre, birth_date, address, about } = request.body;
         try{
-            await connection('user').where({ id_user }).update({ email, name, genre, birth_date, address, about, permission });
-            return response.json({ success: `Usuário atualizado com sucesso!` });
+            await connection('user').where({ id_user: request.user.id_user }).update({ email, name, genre, birth_date, address, about });
+            const token = jwt.sign({ id_user: request.user.id_user, email: email, name: name, genre: genre, birth_date: birth_date, address: address, about: about, image: request.user.image, permission: request.user.permission }, process.env.CRYPTOGRAPHY, { expiresIn: "1d" });
+            return response.json({ success: `Usuário atualizado com sucesso!`, token });
         } catch(error){
-            response.json({ error: `Erro ao atualizar o usuário!` });
+            response.json({ error: `Erro ao atualizar o usuário! ${error}` });
         }
     },
 
     // Atualizar imagem do usuário
     async updateImg(request, response){
-        const { id_user } = request.params;
-        const user = await connection('user').where({ id_user }).select('*').first();
-        if(user.image !== null){
-            const name_image = user.image.split('/')[5];
+        if(request.user.image !== null){
+            const name_image = request.user.image.split('/')[5];
             promisify(fs.unlink)(path.resolve(__dirname, "..", "..", "uploads", "users", name_image));
         }
         const image = `http://localhost:3333/image/user/${request.files[0].filename}`;
         try{
-            await connection('user').where({ id_user }).update({ image });
-            return response.json({ success: `Imagem atualizada com sucesso!` });
+            await connection('user').where({ id_user: request.user.id_user }).update({ image });
+            const token = jwt.sign({ id_user: request.user.id_user, email: request.user.email, name: request.user.name, genre: request.user.genre, birth_date: request.user.birth_date, address: request.user.address, about: request.user.about, image: image, permission: request.user.permission }, process.env.CRYPTOGRAPHY, { expiresIn: "1d" });
+            return response.json({ success: `Imagem atualizada com sucesso!`, token });
         } catch(error){
             response.json({ error: `Erro ao atualizar a imagem! ${error}` });
         }
@@ -79,6 +78,7 @@ module.exports = {
 
     // Listar usuário (Apenas para administradores)
     async list(request, response){
+        if(request.user.permission !== 'admin') return response.json({ warning: `Você deve ser administrador para listar os usuários!` })
         const { permission, search, page } = request.query;
         const [count_users] = await connection('user').whereRaw(permission === 'todos' ? `email LIKE '%${search}%' OR name LIKE '%${search}%' OR address LIKE '%${search}%'` : `permission = '${permission}' AND (email LIKE '%${search}%' OR name LIKE '%${search}%' OR address LIKE '%${search}%')`).count();
         const total_pages = Math.ceil(count_users['count(*)'] / 9);
@@ -107,6 +107,7 @@ module.exports = {
 
     // Deletar usuário (Apenas para administradores)
     async delete(request, response){
+        if(request.user.permission !== 'admin') return response.json({ warning: `Você deve ser administrador para excluir usuários!` })
         const { id_user } = request.params;
         await connection('user').where({ id_user }).delete();
         return response.json({ success: `Usuário excluído com sucesso!` });
