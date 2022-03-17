@@ -21,22 +21,22 @@ routes.get('/user/spreadsheets/:id_user', Auth, UserController.spreadsheets);
 routes.delete('/admin/users/:id_user', Auth, UserController.delete);
 
 // Rotas tópicos
-routes.post('/topic/:user_id', TopicController.create);
-routes.put('/topic/:id_topic', TopicController.update);
-routes.get('/topic', TopicController.list);
-routes.get('/topic/:id_topic', TopicController.listSpecific);
-routes.delete('/topic/:id_topic', TopicController.delete);
+routes.post('/topic', Auth, TopicController.create);
+routes.put('/topic/:id_topic', Auth, TopicController.update);
+routes.get('/topic', Auth, TopicController.list);
+routes.get('/topic/:id_topic', Auth, TopicController.listSpecific);
+routes.delete('/topic/:id_topic', Auth, TopicController.delete);
 
 // Rotas reações
-routes.post('/reaction/:topic_id/:user_id', ReactionController.create);
-routes.put('/reaction/:id_reaction', ReactionController.update);
-routes.delete('/reaction/:id_reaction', ReactionController.delete);
+routes.post('/reaction/:topic_id', Auth, ReactionController.create);
+routes.put('/reaction/:id_reaction', Auth, ReactionController.update);
+routes.delete('/reaction/:id_reaction', Auth, ReactionController.delete);
 
 // Rotas planilhas
-routes.post('/spreadsheet/:user_id', SpreadsheetController.create);
-routes.put('/spreadsheet/:id_spreadsheet/:user_id', SpreadsheetController.update);
-routes.get('/spreadsheet', SpreadsheetController.list);
-routes.get('/spreadsheet/:id_spreadsheet', SpreadsheetController.listSpecific);
-routes.delete('/spreadsheet/:id_spreadsheet/:user_id', SpreadsheetController.delete);
+routes.post('/spreadsheet', Auth, SpreadsheetController.create);
+routes.put('/spreadsheet/:id_spreadsheet', Auth, SpreadsheetController.update);
+routes.get('/spreadsheet', Auth, SpreadsheetController.list);
+routes.get('/spreadsheet/:id_spreadsheet', Auth, SpreadsheetController.listSpecific);
+routes.delete('/spreadsheet/:id_spreadsheet', Auth, SpreadsheetController.delete);
 
 module.exports = routes;

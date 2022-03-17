@@ -3,10 +3,10 @@ const connection = require('../database/connection');
 module.exports = {
     // Criar tópicos
     async create(request, response){
-        const { user_id } = request.params;
+        if(request.user.permission !== 'admin') return response.json({ warning: `Você deve ser administrador para criar tópicos!`});
         const { title, description } = request.body;
         try{
-            await connection('topic').insert({ title, description, user_id });
+            await connection('topic').insert({ title, description, user_id: request.user.id_user });
             return response.json({ success: `Tópico criado com sucesso!` });
         } catch(error){
             response.json({ error: `Não foi possível criar o tópico!` });
@@ -15,6 +15,7 @@ module.exports = {
 
     // Atualizar tópico
     async update(request, response){
+        if(request.user.permission !== 'admin') return response.json({ warning: `Você deve ser administrador para atualizar tópicos!`});
         const { id_topic } = request.params;
         const { title, description } = request.body;
         try{
@@ -47,6 +48,7 @@ module.exports = {
 
     // Deletar tópicos
     async delete(request, response){
+        if(request.user.permission !== 'admin') return response.json({ warning: `Você deve ser administrador para excluir tópicos!`});
         const { id_topic } = request.params;
         await connection('topic').where({ id_topic }).delete();
         return response.json({ success: `Tópico excluído com sucesso!` });

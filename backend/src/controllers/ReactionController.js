@@ -3,10 +3,10 @@ const connection = require('../database/connection');
 module.exports = {
     // Criar reação
     async create(request, response){
-        const { topic_id, user_id } = request.params;
+        const { topic_id } = request.params;
         const { type, commentary } = request.body;
         try{
-            await connection('reaction').insert({ type, commentary, topic_id, user_id });
+            await connection('reaction').insert({ type, commentary, topic_id, user_id: request.user.id_user });
             return response.json({ success: `Reação criada com sucesso!` });
         } catch(error){
             response.json({ error: `Não foi possível criar a reação!` });

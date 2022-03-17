@@ -1,12 +1,14 @@
 const connection = require("../database/connection");
 
+const date = new Date();
+const month = new Array('Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro');
+
 module.exports = {
     // Criar planilha
     async create(request, response){
-        const { user_id } = request.params;
-        const { name_spreadsheet, initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet } = request.body;
+        const { initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet } = request.body;
         try{
-            await connection('spreadsheet').insert({ name_spreadsheet, initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet, user_id });
+            await connection('spreadsheet').insert({ name_spreadsheet: `Planilha ${month[date.getMonth()]} de ${date.getFullYear()}`, initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet, user_id: request.user.id_user });
             return response.json({ success: `Planilha criada com sucesso!` });
         } catch(error){
             response.json({ error: `Não foi possível criar a planilha!` });
@@ -15,10 +17,10 @@ module.exports = {
 
     // Atualizar planilha (apena o dono da planilha pode atualizar)
     async update(request, response){
-        const { id_spreadsheet, user_id } = request.params;
-        const { name_spreadsheet, initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet } = request.body;
+        const { id_spreadsheet } = request.params;
+        const { initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet } = request.body;
         try{
-            await connection('spreadsheet').where({ id_spreadsheet, user_id }).update({ name_spreadsheet, initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet });
+            await connection('spreadsheet').where({ id_spreadsheet, user_id: request.user.id_user }).update({ initial_bankroll, objective, daily_profit, payout, in_box, type_spreadsheet });
             return response.json({ success: `Planilha atualizada com sucesso!` });
         } catch(error){
             response.json({ error: `Erro ao atualizar a planilha!` });
@@ -44,8 +46,8 @@ module.exports = {
 
     // Deletar planilha (apena o dono da planilha pode deletar)
     async delete(request, response){
-        const { id_spreadsheet, user_id } = request.params;
-        await connection('spreadsheet').where({ id_spreadsheet, user_id }).delete();
+        const { id_spreadsheet } = request.params;
+        await connection('spreadsheet').where({ id_spreadsheet, user_id: request.user.id_user }).delete();
         return response.json({ success: `Planilha excluída com sucesso!` });
     }
 }
